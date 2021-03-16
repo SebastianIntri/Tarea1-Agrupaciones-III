@@ -1,0 +1,51 @@
+-- Tarea
+
+--1
+--Cómo obtenemos todos los nombres y correos de nuestros clientes canadienses para una campaña?
+select concat(c.first_name, ' ', c.last_name) full_name, c.email
+from customer c join address a using (address_id)
+join city c2 using (city_id) join country c3 using (country_id)
+where c3.country = 'Canada';
+
+--2
+--Qué cliente ha rentado más de nuestra sección de adultos?
+select concat(c.first_name, ' ', c.last_name), c.customer_id, t.cant_rents from customer c join (
+	select r.customer_id, count(r.rental_id) cant_rents
+	from rental r join inventory i2 using (inventory_id)
+	join film f using (film_id)
+	where f.rating = 'NC-17'
+	group by r.customer_id 
+	order by cant_rents desc
+	limit 1
+	) t on c.customer_id = t.customer_id;
+	
+--3
+--Qué películas son las más rentadas en todas nuestras stores?
+-- No entendí bien la pregunta ¿? :(
+
+--Aquí hice las 10 películas más rentadas en general de la store
+select f.title, f.film_id, t.rents from film f join (
+	select i.film_id, count(r.rental_id) rents 
+	from rental r join inventory i using (inventory_id)
+	group by i.film_id
+	order by rents desc
+	limit 10
+	) t on f.film_id = t.film_id;
+
+--Aquí obtuve la película más rentada por cada store
+select f.title, f.film_id, t.store_id, t.cant_rents from film f join (
+	select s.store_id, i.film_id, count(r.rental_id) cant_rents
+	from rental r join inventory i using (inventory_id) join store s using (store_id) 
+	group by s.store_id, i.film_id 
+	order by cant_rents desc
+	limit 2
+	) t on f.film_id = t.film_id;
+
+
+
+--4
+--Cuál es nuestro revenue por store?
+select s.store_id, sum(p.amount) store_revenue
+from payment p join rental r using (rental_id) join inventory i using (inventory_id) join store s using (store_id)
+group by s.store_id
+order by s.store_id;
