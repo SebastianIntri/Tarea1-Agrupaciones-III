@@ -1,0 +1,98 @@
+Tarea BD Transacciones
+
+Información:
+
+1-
+transferir_capitales(Ulises, Julieta, 66048.20)
+transferir_efectivo(Julieta, Ulises, 66048.20)
+
+2-
+transferir_capitales(Sebas, Javier, 716.76)
+transferir_efectivo(Javier, Sebas, 716.76)
+tranferir_deuda(Javier, Sebas, 2998.12)
+
+3-
+transferir_deuda(DJ Delgado, Frida, 40032.71)
+tranferir_divisas(DJ Delgado, Frida, 504,000)
+Transferir_efectivo(Frida, DJ Delgado, 544,032.71)
+
+
+-- Se crean las posturas de ventas de las tres ordenes y también las posturas de compra de las tres ordenes. Así el sistema podrá hacer el matching y empezar hacer las transferencias.
+
+Start transaction;
+Insert postura venta capitales 1;
+Insert postura venta capitales 2;
+Commit;
+
+Start transaction;
+Insert postura venta deuda 1;
+Commit;
+
+Start transaction;
+Insert postura venta divisas 1;
+Commit;
+
+Start transaction;
+Insert postura compra capitales 1;
+Insert postura compra capitales 2;
+Commit;
+
+Start transaction;
+Insert postura compra deuda 1;
+Commit;
+
+Start transaction;
+Insert postura compra divisas 1;
+Commit;
+
+
+-- Checar si se hiciera o no las transferencias correctas para mandar el dinero en efectivo o hacer el rollback
+
+Start transaction;
+transferir_capitales(Ulises, Julieta, 66048.20);
+If success then 
+	commit;
+	transferir_efectivo(Julieta, Ulises, 66048.20);
+If error then rollback;
+
+
+Start transaction;
+transferir_capitales(Sebas, Javier, 716.76)
+If success then 
+	commit;
+	Start transaction;
+	tranferir_deuda(Javier, Sebas, 2998.12);
+	If success then 
+		commit;
+		transferir_efectivo(Javier, Sebas, 716.76);
+	If error then rollback;
+If error then rollback;
+
+
+Start transaction;
+transferir_deuda(DJ Delgado, Frida, 40032.71);
+tranferir_divisas(DJ Delgado, Frida, 504,000);
+If success then 
+	commit;
+	Transferir_efectivo(Frida, DJ Delgado, 544,032.71);
+If error then rollback;
+
+
+-- Después de haber logrado o no la transferencia debemos ejecutar las ordenes 
+
+start transaction;
+Ejecutar orden mercado capitales 1;
+Ejecutar orden mercado capitales 2:
+Commit;
+
+start transaction;
+Ejecutar orden mercado deuda 1;
+Commit;
+
+start transaction;
+Ejecutar orden mercado divisas 1;
+Commit;
+
+
+
+
